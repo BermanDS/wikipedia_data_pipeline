@@ -1,0 +1,85 @@
+version: '3.3'
+
+services:
+  postgres:
+    container_name: postgres_container
+    image: postgres:13.3
+    env_file:
+      - ../.env
+    command:
+      - "postgres"
+      - "-c"
+      - "max_connections=$PG__MAX_CONNECTIONS"
+      - "-c"
+      - "shared_buffers=$PG__SHARED_BUFFERS"
+      - "-c"
+      - "effective_cache_size=$PG__EFFECTIVE_CACHE_SIZE"
+      - "-c"
+      - "work_mem=$PG__WORK_MEM"
+      - "-c"
+      - "maintenance_work_mem=$PG__MAINTENANCE_WORK_MEM"
+      - "-c"
+      - "random_page_cost=1.1"
+      - "-c"
+      - "temp_file_limit=$PG__TEMP_FILE_LIMIT"
+      - "-c"
+      - "log_min_duration_statement=200ms"
+      - "-c"
+      - "idle_in_transaction_session_timeout=10s"
+      - "-c"
+      - "lock_timeout=1s"
+      - "-c"
+      - "statement_timeout=60s"
+      - "-c"
+      - "shared_preload_libraries=pg_stat_statements"
+      - "-c"
+      - "pg_stat_statements.max=10000"
+      - "-c"
+      - "pg_stat_statements.track=all"
+      - "-c"
+      - "logging_collector=on"
+      - "-c"
+      - "log_destination=stderr"
+      - "-c"
+      - "log_directory=/logs"
+    environment:
+      POSTGRES_USER: $PG__USER
+      POSTGRES_PASSWORD: $PG__PASSW
+      PGDATA: "/var/lib/postgresql/data"
+    volumes:
+      - .:/docker-entrypoint-initdb.d
+      - $PG__DATA:/var/lib/postgresql/data
+      - $PG__LOGS:/logs
+    ports:
+      - "$PG__PORT:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d admin"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+  #--------------------------------------------------------------------------------
+  pgadmin:
+    container_name: pgadmin_container
+    image: dpage/pgadmin4:5.7
+    env_file:
+      - ../.env
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "${PGADMIN__EMAIL}"
+      PGADMIN_DEFAULT_PASSWORD: "${PGADMIN__PASSWD}"
+      PGADMIN_CONFIG_SERVER_MODE: "${PGADMIN__SERVER_MODE}"
+    volumes:
+      - $PGADMIN__DATA:/var/lib/pgadmin
+    ports:
+      - "$PGADMIN__PORT:80"
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G

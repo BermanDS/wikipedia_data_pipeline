@@ -1,0 +1,19 @@
+version: '3.3'
+
+services:
+  app_consumer:
+    container_name: app_flink_consumer
+    build: .
+    env_file:
+      - ../.env
+    environment:
+      TZ: $TZ
+      PYTHONUNBUFFERED: 0
+    volumes:
+      - $LOG__PATH_VOLUME:$LOG__PATH
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '3'
+          memory: 8G
