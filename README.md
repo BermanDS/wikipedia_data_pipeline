@@ -1,5 +1,5 @@
 Data pipeline with using as source - streaming API provided by Wikipedia. The further points in pipeline will be Kafka, Apache Flink framework and PostgreSQL.
-# Test case of developing pipeline from streaming API up to DataBase
+## Test case of developing pipeline from streaming API to DataBase by using Flink
 -----------------------------------------------------------------------------------------------------
 ### Task definition:
 
